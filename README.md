@@ -1,5 +1,6 @@
 # CSV2JSON
 Convert CSV Files to JSON Go.
+
 *Forked from [Ahmad-Magdy/CSV-To-JSON-Converter](https://github.com/Ahmad-Magdy/CSV-To-JSON-Converter).*
 
 ## How to build:
