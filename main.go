@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
+	flag "github.com/spf13/pflag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,36 +16,52 @@ import (
 )
 
 func main() {
-	var path string = os.Args[1]
-	fmt.Println("Path to file: ",path)
-	fileBytes, fileNPath := ReadCSV(path)
+	to_skip := flag.IntP("skip", "s", 1, "Skip the first how many rows")
+	header  := flag.IntP("header", "h", 0, "Specify the header row for the input file")
+	flag.Parse()
+
+	args := flag.Args()
+	path := args[0]
+
+	fmt.Println("Path to file:",path, " Skip:", *to_skip, "Header:", *header)
+
+	fileBytes, fileNPath := ReadCSV(path, *to_skip, *header)
 	SaveFile(fileBytes, fileNPath)
 	fmt.Println(strings.Repeat("=", 10), "Done", strings.Repeat("=", 10))
 }
 
-// ReadCSV to read the content of CSV File
-func ReadCSV(path string) ([]byte, string) {
+func ReadCSV(path string, to_skip int, header int) ([]byte, string) {
+	// ReadCSV to read the content of CSV File
 	csvFile, err := os.Open(path)
-
-	if err != nil {
-		log.Fatal("The file is not found || wrong root")
-	}
+	if err != nil { log.Fatal("The file is not found || wrong root") }
 	defer csvFile.Close()
 
 	reader := csv.NewReader(csvFile)
-	content, _ := reader.ReadAll()
-
-	if len(content) < 1 {
-		log.Fatal("Something wrong, the file maybe empty or length of the lines are not the same")
+	var content [][]string
+	i := 0
+	for {
+		line, err := reader.Read()
+		if err == io.EOF { break }
+		if i < to_skip == true { // Skip rows
+			i++
+			continue
+		} else {
+			content = append(content, line)
+			//fmt.Println(line) // For testing
+			i++
+		}
+		//if err != nil { log.Fatal("Error: ",err) }
 	}
 
+	if len(content) < 1 { log.Fatal("Error: ", err ) }
+
 	headersArr := make([]string, 0)
-	for _, headE := range content[0] {
+	for _, headE := range content[header-1] {
 		headersArr = append(headersArr, headE)
 	}
 
-	//Remove the header row
-	content = content[1:]
+	// Remove the header row
+	content = content[header-1:]
 
 	var buffer bytes.Buffer
 	buffer.WriteString("[")
@@ -82,8 +100,8 @@ func ReadCSV(path string) ([]byte, string) {
 	return x, filepath.Join(r, newFileName)
 }
 
-// SaveFile Will Save the file, magic right?
 func SaveFile(myFile []byte, path string) {
+	// SaveFile Will Save the file, magic right?
 	if err := ioutil.WriteFile(path, myFile, os.FileMode(0644)); err != nil {
 		panic(err)
 	}

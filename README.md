@@ -18,8 +18,9 @@ ln -s ~/path/to/csv2json/csv2json csv2json
 ```
 Then to run simply do the following:
 ```shell
-$ csv2json data.csv
+$ csv2json data.csv -s 1 -h 2
 ```
+If you want to skip the first row and use the second as the header.
 
 ## Example:
 If i have a csv file contains a people data **people.csv**:
@@ -30,7 +31,7 @@ Id,Name,Age
 ```
 and we need to convert it to json file:
 
-`$ csv2json people.csv`
+`$ csv2json people.csv -h 1`
 
 after writing this command you will get another file in the same directory called **people.json** with the data in the new format:
 ```json
