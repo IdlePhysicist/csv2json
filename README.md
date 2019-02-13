@@ -1,5 +1,5 @@
 # CSV2JSON
-Convert CSV Files to JSON Go.
+Convert CSV files to JSON files with Go.
 
 *Forked from [Ahmad-Magdy/CSV-To-JSON-Converter](https://github.com/Ahmad-Magdy/CSV-To-JSON-Converter).*
 
@@ -10,12 +10,13 @@ Convert CSV Files to JSON Go.
 3. To run `./csv2json data.csv`
 
 **Optional Step:**
+
 4. Link the executable to a handy location.
 ```shell
 cd /usr/local/bin
 ln -s ~/path/to/csv2json/csv2json csv2json
 ```
-5. Then to run simply do the following:
+Then to run simply do the following:
 ```shell
 $ csv2json data.csv
 ```
