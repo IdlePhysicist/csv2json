@@ -2,6 +2,7 @@
 *.o
 *.a
 *.so
+csv2json
 
 # Folders
 _obj
@@ -22,6 +23,9 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+*csv
+*.json
 
 # =========================
 # Operating System Files
@@ -51,25 +55,3 @@ _testmain.go
 Network Trash Folder
 Temporary Items
 .apdisk
-
-# Windows
-# =========================
-
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# Windows shortcuts
-*.lnk

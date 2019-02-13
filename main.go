@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -15,16 +14,16 @@ import (
 )
 
 func main() {
-	path := flag.String("path", "./data.csv", "Path of the file")
-	flag.Parse()
+	var path string = os.Args[1]
+	fmt.Println("Path to file: ",path)
 	fileBytes, fileNPath := ReadCSV(path)
 	SaveFile(fileBytes, fileNPath)
 	fmt.Println(strings.Repeat("=", 10), "Done", strings.Repeat("=", 10))
 }
 
 // ReadCSV to read the content of CSV File
-func ReadCSV(path *string) ([]byte, string) {
-	csvFile, err := os.Open(*path)
+func ReadCSV(path string) ([]byte, string) {
+	csvFile, err := os.Open(path)
 
 	if err != nil {
 		log.Fatal("The file is not found || wrong root")
@@ -77,9 +76,9 @@ func ReadCSV(path *string) ([]byte, string) {
 	buffer.WriteString(`]`)
 	rawMessage := json.RawMessage(buffer.String())
 	x, _ := json.MarshalIndent(rawMessage, "", "  ")
-	newFileName := filepath.Base(*path)
+	newFileName := filepath.Base(path)
 	newFileName = newFileName[0:len(newFileName)-len(filepath.Ext(newFileName))] + ".json"
-	r := filepath.Dir(*path)
+	r := filepath.Dir(path)
 	return x, filepath.Join(r, newFileName)
 }
 

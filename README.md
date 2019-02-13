@@ -1,14 +1,23 @@
-# CSV-To-JSON-Converter
-A little script to convert CSV Files to JSON in easy and flexible way using GoLang.
+# CSV2JSON
+Convert CSV Files to JSON Go.
+*Forked from [Ahmad-Magdy/CSV-To-JSON-Converter](https://github.com/Ahmad-Magdy/CSV-To-JSON-Converter).*
 
-**The Reason** for this tool is i was in charge to convert a couple of csv files to JSON and 
-i didn't find simple thing give me exactly what i expect from such a tool,
-and i looked for golang examples but i found most of it using struct for single case, so i built this to be flexible enough for any file.
-## How to use this tool:
-* After Downloading the go file you can run
-`go run main.go -path=C:\\TheFile.csv` or `go run main.go -path C:\\TheFile.csv` or after getting the executable file `myfile.exe -path=C:\\TheFile.csv`
-* you will have a new file in the same root as the csv one but with JSON extension.
+## How to build:
 
+1. After downloading / cloning navigate to the repo directory.
+2. Build an executable with `go build`
+3. To run `./csv2json data.csv`
+
+**Optional Step:**
+4. Link the executable to a handy location.
+```shell
+cd /usr/local/bin
+ln -s ~/path/to/csv2json/csv2json csv2json
+```
+5. Then to run simply do the following:
+```shell
+$ csv2json data.csv
+```
 
 ## Example:
 If i have a csv file contains a people data **people.csv**:
@@ -19,7 +28,7 @@ Id,Name,Age
 ```
 and we need to convert it to json file:
 
-`go run main.go -path=C:\Users\User\Desktop\data\src\people.csv`
+`$ csv2json people.csv`
 
 after writing this command you will get another file in the same directory called **people.json** with the data in the new format:
 ```json
@@ -40,4 +49,4 @@ after writing this command you will get another file in the same directory calle
 and that's it.
 
 ## License:
-[The MIT License](https://github.com/Ahmad-Magdy/CSV-To-JSON-Converter/blob/master/LICENSE)
+[The MIT License](https://github.com/IdlePhysicist/csv2json/blob/master/LICENSE)
