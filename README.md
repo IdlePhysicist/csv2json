@@ -6,21 +6,8 @@ Convert CSV files to JSON files with Go.
 ## How to build:
 
 1. After downloading / cloning navigate to the repo directory.
-2. Build an executable with `go build`
-3. To run `./csv2json data.csv`
-
-**Optional Step:**
-
-4. Link the executable to a handy location.
-```shell
-cd /usr/local/bin
-ln -s ~/path/to/csv2json/csv2json csv2json
-```
-Then to run simply do the following:
-```shell
-$ csv2json data.csv -s 1 -h 2
-```
-If you want to skip the first row and use the second as the header.
+2. Build an executable with `go install`
+3. To run `csv2json data.csv`
 
 ## Example:
 If i have a csv file contains a people data **people.csv**:
@@ -31,7 +18,7 @@ Id,Name,Age
 ```
 and we need to convert it to json file:
 
-`$ csv2json people.csv -h 1`
+`$ csv2json people.csv`
 
 after writing this command you will get another file in the same directory called **people.json** with the data in the new format:
 ```json
