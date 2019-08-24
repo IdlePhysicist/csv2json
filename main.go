@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"flag"
-	"io"
 	"io/ioutil"
   "log"
 	"os"
@@ -51,15 +50,7 @@ func (f *File) Read() error {
 	defer csvFile.Close()
 
 	reader := csv.NewReader(csvFile)
-
-	for {
-		line, err := reader.Read()
-		if err == io.EOF {
-      break
-    }
-
-    f.Data = append(f.Data, line)
-	}
+	f.Data, _ = reader.ReadAll()
 
 	if len(f.Data) < 1 {
     return err
@@ -85,7 +76,7 @@ func (f *File) JSONify() error {
 
     for j, y := range d {
 			buf.WriteString(`"` + f.Head[j] + `":`)
-			_, fErr := strconv.ParseFloat(y, 32)
+			_, fErr := strconv.ParseFloat(y, 64)
 			_, bErr := strconv.ParseBool(y)
 
 			if fErr == nil {
@@ -126,8 +117,9 @@ func (f *File) Write() error {
 
 	// Figuring out the new file name
 	dir, file := filepath.Split(f.Path)
-	strings.Replace(file, filepath.Ext(file), `json`, 1)
+	file = strings.Replace(file, filepath.Ext(file), ".json", 1)
 	path := filepath.Join(dir, file)
+	log.Println("write: New file: %s", path)
 
 	// Write the new file
 	err = ioutil.WriteFile(path, jsonStr, 0644)
