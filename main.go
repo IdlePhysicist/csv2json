@@ -119,7 +119,7 @@ func (f *File) Write() error {
 	dir, file := filepath.Split(f.Path)
 	file = strings.Replace(file, filepath.Ext(file), ".json", 1)
 	path := filepath.Join(dir, file)
-	log.Println("write: New file: %s", path)
+	log.Println("write: New file: ", path)
 
 	// Write the new file
 	err = ioutil.WriteFile(path, jsonStr, 0644)
