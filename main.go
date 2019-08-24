@@ -4,105 +4,136 @@ import (
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
-	flag "github.com/spf13/pflag"
-	"fmt"
+	"flag"
 	"io"
 	"io/ioutil"
-	"log"
+  "log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
 
-func main() {
-	to_skip := flag.IntP("skip", "s", 1, "Skip the first how many rows")
-	header  := flag.IntP("header", "h", 0, "Specify the header row for the input file")
-	flag.Parse()
-
-	args := flag.Args()
-	path := args[0]
-
-	fmt.Println("Path to file:",path, " Skip:", *to_skip, "Header:", *header)
-
-	fileBytes, fileNPath := ReadCSV(path, *to_skip, *header)
-	SaveFile(fileBytes, fileNPath)
-	fmt.Println(strings.Repeat("=", 10), "Done", strings.Repeat("=", 10))
+type File struct {
+  Data  [][]string
+  Json  bytes.Buffer
+  Path  string
+  Head  []string
 }
 
-func ReadCSV(path string, to_skip int, header int) ([]byte, string) {
-	// ReadCSV to read the content of CSV File
-	csvFile, err := os.Open(path)
-	if err != nil { log.Fatal("The file is not found || wrong root") }
+func main() {
+	flag.Parse()
+  file := &File{Path: flag.Args()[0]}
+
+	err := file.Read()
+  if err != nil {
+		log.Printf("read: Error: %s", err)
+  }
+
+  err = file.JSONify()
+  if err != nil {
+		log.Printf("jsonify: Error: %s", err)
+  }
+
+	err = file.Write()
+  if err != nil {
+		log.Printf("write: Error: %s", err)
+  }
+
+  log.Print(`Done`)
+}
+
+func (f *File) Read() error {
+	csvFile, err := os.Open(f.Path)
+	if err != nil {
+    return err
+  }
 	defer csvFile.Close()
 
 	reader := csv.NewReader(csvFile)
-	var content [][]string
-	i := 0
+
 	for {
 		line, err := reader.Read()
-		if err == io.EOF { break }
-		if i < to_skip == true { // Skip rows
-			i++
-			continue
-		} else {
-			content = append(content, line)
-			//fmt.Println(line) // For testing
-			i++
-		}
-		//if err != nil { log.Fatal("Error: ",err) }
+		if err == io.EOF {
+      break
+    }
+
+    f.Data = append(f.Data, line)
 	}
 
-	if len(content) < 1 { log.Fatal("Error: ", err ) }
+	if len(f.Data) < 1 {
+    return err
+  }
 
-	headersArr := make([]string, 0)
-	for _, headE := range content[header-1] {
-		headersArr = append(headersArr, headE)
+	for _, col := range f.Data[0] {
+		f.Head = append(f.Head, col)
 	}
 
 	// Remove the header row
-	content = content[header-1:]
+	f.Data = f.Data[1:]
 
-	var buffer bytes.Buffer
-	buffer.WriteString("[")
-	for i, d := range content {
-		buffer.WriteString("{")
-		for j, y := range d {
-			buffer.WriteString(`"` + headersArr[j] + `":`)
-			_, fErr := strconv.ParseFloat(y, 32)
-			_, bErr := strconv.ParseBool(y)
-			if fErr == nil {
-				buffer.WriteString(y)
-			} else if bErr == nil {
-				buffer.WriteString(strings.ToLower(y))
-			} else {
-				buffer.WriteString((`"` + y + `"`))
-			}
-			//end of property
-			if j < len(d)-1 {
-				buffer.WriteString(",")
-			}
-
-		}
-		//end of object of the array
-		buffer.WriteString("}")
-		if i < len(content)-1 {
-			buffer.WriteString(",")
-		}
-	}
-
-	buffer.WriteString(`]`)
-	rawMessage := json.RawMessage(buffer.String())
-	x, _ := json.MarshalIndent(rawMessage, "", "  ")
-	newFileName := filepath.Base(path)
-	newFileName = newFileName[0:len(newFileName)-len(filepath.Ext(newFileName))] + ".json"
-	r := filepath.Dir(path)
-	return x, filepath.Join(r, newFileName)
+  return nil
 }
 
-func SaveFile(myFile []byte, path string) {
-	// SaveFile Will Save the file, magic right?
-	if err := ioutil.WriteFile(path, myFile, os.FileMode(0644)); err != nil {
-		panic(err)
+func (f *File) JSONify() error {
+	var buf bytes.Buffer
+
+	buf.WriteString("[")
+
+	for i, d := range f.Data {
+		buf.WriteString("{")
+
+    for j, y := range d {
+			buf.WriteString(`"` + f.Head[j] + `":`)
+			_, fErr := strconv.ParseFloat(y, 32)
+			_, bErr := strconv.ParseBool(y)
+
+			if fErr == nil {
+				buf.WriteString(y)
+			} else if bErr == nil {
+				buf.WriteString(strings.ToLower(y))
+			} else {
+				buf.WriteString((`"` + y + `"`))
+			}
+
+			// End of property
+			if j < len(d)-1 {
+				buf.WriteString(",")
+			}
+
+		}
+		// End of object of the array
+		buf.WriteString("}")
+		if i < len(f.Data)-1 {
+			buf.WriteString(",")
+		}
 	}
+
+	buf.WriteString(`]`)
+
+  // Add the buffer to the struct
+  f.Json = buf
+
+  return nil
+}
+
+func (f *File) Write() error {
+	rawMessage := json.RawMessage(f.Json.String())
+	jsonStr, err := json.MarshalIndent(rawMessage, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	// Figuring out the new file name
+	dir, file := filepath.Split(f.Path)
+	strings.Replace(file, filepath.Ext(file), `json`, 1)
+	path := filepath.Join(dir, file)
+
+	// Write the new file
+	err = ioutil.WriteFile(path, jsonStr, 0644)
+  if err != nil {
+		return err
+	}
+
+	return nil
 }
